@@ -1,0 +1,118 @@
+---
+title: "Correlacion Lineal"
+author: "Genoveva Serrano Fernández"
+output: html_document
+date: "2024-02-26 y 2024-02-27"
+---
+
+###Introduccion
+
+```{r echo=TRUE}
+library(readxl)
+data <-as.data.frame(read_excel("C:/correlacion/data.xlsx"))
+data
+```
+### Dibujamos matriz de correlacion 
+#Para añadir coeficientes de correlacion
+```{r}
+panel.cor<-function(x,y,digits=2, prefix="",cex.cor,...){
+usr<-par("usr")
+on.exit(par(usr))
+par(usr= c(0,1,0,1))
+Cor<- abs(cor(x,y))
+txt<- paste0(prefix, format(c(Cor, 0.123456789), digits=digits) [1])
+if(missing(cex.cor)) {
+cex.cor<-0.4/strwidth(txt)
+}
+text(0.5,0.5,txt,
+  cex= 1 + cex.cor * Cor)
+}
+
+#Dibujamos matriz
+
+pairs(data,
+      upper.panel=panel.cor,
+      lower.panel= panel.smooth)
+
+```
+```{r echo=TRUE}
+cor.test(data$longitud, data$peso)
+```
+Para comprobar que la correlacion no es al azar, usamos esto, y mirando el p-value, si este es menor a 0,05 es que es fiable, hay pocas posibilidades de que sea al azar. Hacemos el 0,05 porque hemos caculado en un intervalo de confianza del 95%, por ende es ese 5% restante el valor maximo del p-value.
+
+```{r warning=FALSE}
+library(correlation)
+resultados<-correlation(data)
+resultados
+```
+```{r echo=TRUE}
+library(ggpubr)
+ggscatter(data, x = "longitud", y = "peso",
+          add ="reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method= "pearson",
+          xlab = "Longitud piezaas (mm)", ylab = "Peso piezas (mg)")
+```
+Una correlacion positiva donde los puntos son la interrelacion entre el peso y la longitud de las piezas. La tendencia de la recta lo que marca es que a medida que aumenta una variabe aumenta la otra.
+
+
+```{r }
+library(corrplot)
+corrplot(cor(data))
+```
+El mismo caso que el anterior, a medida que el punto se acerca a 1, es que cuanto mas aumenta una de las variables, la otra tambien.
+
+```{r}
+corrplot.mixed(cor(data))
+```
+Y asi se haria una grafica mas o menos mixta. Que muestra el coeficiente de correlacion con su color.
+
+VECTORES
+```{r}
+distancia <- c(1.1,100.2,90.3,5.4,57.5,6.6,34.7,65.8,57.9,86.1)
+ numero_cuentas <- c(110,2,6,98,40,94,31,5,8,10)
+
+dist_ncuent <- data.frame(distancia, numero_cuentas)
+knitr::kable(dist_ncuent)
+
+```
+ ##Calcula coeficiente de correlacion
+ 
+```{r warning=FALSE}
+library(correlation)
+resultados<-correlation(dist_ncuent)
+resultados
+```
+La correlacion es calculada al 95% de confianza. El resultado del coeficiente de la correlacion es de -0,92, por ende es una correlacion de caracter negativo.
+
+ ##Calcula el nivel de significancia
+```{r echo=TRUE}
+cor.test(dist_ncuent$distancia, dist_ncuent$numero_cuentas)
+```
+El nivel de significancia es -0.9249824
+
+ ##Intervalo de confianza al 95% en relacion con el coeficiente de correlacion
+ 
+ En el ejercicio anterior sacamos el valor de p dando como resultado p-value = 0.0001265, lo que significa, que del 95% solo un 5% es la probabilidad de que la correlacion sea al azar, en nuestro caso, es menor a 0,05 el valor de p, por lo que cabe casi ninguna posibilidad de que la correlacion sea al azar.
+ 
+##¿Qué intensidad y dirección presentan ambas variables?
+
+```{r echo=TRUE}
+library(ggpubr)
+ggscatter(dist_ncuent, x = "distancia", y = "numero_cuentas",
+          add ="reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method= "pearson",
+          xlab = "Distancia (Km)", ylab = "Número de piezas")
+```
+
+##¿Es significativa esta relacion?
+Es significativa la correlacion porque el índice de probabilidad de que la correlación entre estas variables sea al azar es muy pequeño.
+
+##¿Resultaria apropiado afirmar la correlacion (o no) entre variables con un tamaño muestral tan reducido (n=10)?
+
+Lo apropiado sería obtener el mayor número de muestras posibles, con un muestreo tan superficial no creo que sea posible, podría causar sesgos, aunque en este caso cumple con el pensamiento lógico de que los materiales se encuentran más concentrados cerca de su fuente de orígen.
+
+
+
+
+
+
